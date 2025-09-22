@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catatan Tugas - Task Notes</title>
+    <meta name="description" content="Aplikasi web untuk mengelola catatan tugas dengan sistem notifikasi alarm">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tasks"></i> Catatan Tugas</h1>
+            <p>Kelola tugas Anda dengan sistem reminder otomatis</p>
+        </header>
+
+        <main>
+            <!-- Form untuk menambah tugas baru -->
+            <section class="task-form-section">
+                <h2>Tambah Tugas Baru</h2>
+                <form id="taskForm" class="task-form">
+                    <div class="form-group full-width">
+                        <label for="taskTitle">Judul Tugas:</label>
+                        <input type="text" id="taskTitle" required placeholder="Masukkan judul tugas...">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="taskDescription">Deskripsi:</label>
+                        <textarea id="taskDescription" placeholder="Deskripsi tugas (opsional)..."></textarea>
+                    </div>
+                    
+                    <div class="form-group half-width">
+                        <label for="taskDate">Tanggal Deadline:</label>
+                        <input type="date" id="taskDate" required>
+                    </div>
+                    
+                    <div class="form-group half-width">
+                        <label for="taskTime">Waktu Deadline:</label>
+                        <input type="time" id="taskTime" required>
+                    </div>
+                    
+                    <div class="form-group half-width">
+                        <label for="taskPriority">Prioritas:</label>
+                        <select id="taskPriority">
+                            <option value="low">Rendah</option>
+                            <option value="medium" selected>Sedang</option>
+                            <option value="high">Tinggi</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group half-width">
+                        <label for="reminderTime">Pengingat Sebelum Deadline:</label>
+                        <select id="reminderTime">
+                            <option value="0">Tepat waktu</option>
+                            <option value="5">5 menit sebelum</option>
+                            <option value="15">15 menit sebelum</option>
+                            <option value="30">30 menit sebelum</option>
+                            <option value="60">1 jam sebelum</option>
+                            <option value="1440">1 hari sebelum</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group submit-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Tugas
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Filter dan kontrol -->
+            <section class="controls-section">
+                <div class="filter-controls">
+                    <button class="btn btn-filter active" data-filter="all">
+                        <i class="fas fa-list"></i> Semua
+                    </button>
+                    <button class="btn btn-filter" data-filter="pending">
+                        <i class="fas fa-clock"></i> Belum Selesai
+                    </button>
+                    <button class="btn btn-filter" data-filter="completed">
+                        <i class="fas fa-check"></i> Selesai
+                    </button>
+                    <button class="btn btn-filter" data-filter="overdue">
+                        <i class="fas fa-exclamation-triangle"></i> Terlambat
+                    </button>
+                </div>
+                
+                <div class="action-controls">
+                    <button class="btn btn-secondary" id="clearCompleted">
+                        <i class="fas fa-trash"></i> Hapus Selesai
+                    </button>
+                    <button class="btn btn-info" id="testNotification">
+                        <i class="fas fa-bell"></i> Test Notifikasi
+                    </button>
+                    <button class="btn btn-warning" id="testAlarm">
+                        <i class="fas fa-volume-up"></i> Test Alarm Penuh
+                    </button>
+                    <button class="btn btn-success" id="testAudio">
+                        <i class="fas fa-music"></i> Test Audio WAV
+                    </button>
+                </div>
+            </section>
+
+            <!-- Daftar tugas -->
+            <section class="tasks-section">
+                <h2>Daftar Tugas</h2>
+                <div id="tasksList" class="tasks-list">
+                    <!-- Tugas akan ditampilkan di sini -->
+                </div>
+                
+                <div id="emptyState" class="empty-state">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>Belum ada tugas</h3>
+                    <p>Tambahkan tugas pertama Anda di atas!</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal untuk edit tugas -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Tugas</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <form id="editTaskForm" class="task-form">
+                    <input type="hidden" id="editTaskId">
+                    
+                    <div class="form-group full-width">
+                        <label for="editTaskTitle">Judul Tugas:</label>
+                        <input type="text" id="editTaskTitle" required>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="editTaskDescription">Deskripsi:</label>
+                        <textarea id="editTaskDescription"></textarea>
+                    </div>
+                    
+                    <div class="form-group half-width">
+                        <label for="editTaskDate">Tanggal Deadline:</label>
+                        <input type="date" id="editTaskDate" required>
+                    </div>
+                    
+                    <div class="form-group half-width">
+                        <label for="editTaskTime">Waktu Deadline:</label>
+                        <input type="time" id="editTaskTime" required>
+                    </div>
+                    
+                    <div class="form-group half-width">
+                        <label for="editTaskPriority">Prioritas:</label>
+                        <select id="editTaskPriority">
+                            <option value="low">Rendah</option>
+                            <option value="medium">Sedang</option>
+                            <option value="high">Tinggi</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group half-width">
+                        <label for="editReminderTime">Pengingat Sebelum Deadline:</label>
+                        <select id="editReminderTime">
+                            <option value="0">Tepat waktu</option>
+                            <option value="5">5 menit sebelum</option>
+                            <option value="15">15 menit sebelum</option>
+                            <option value="30">30 menit sebelum</option>
+                            <option value="60">1 jam sebelum</option>
+                            <option value="1440">1 hari sebelum</option>
+                        </select>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelEdit">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio untuk alarm -->
+    <audio id="alarmSound" preload="auto" loop>
+        <source src="assets/alarm.wav" type="audio/wav">
+        <source src="assets/alarm.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Audio cadangan untuk alarm yang lebih loud -->
+    <audio id="alarmSoundBackup" preload="auto">
+        <source src="assets/alarm.wav" type="audio/wav">
+        <source src="assets/alarm.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
